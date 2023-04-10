@@ -36,11 +36,14 @@ func (b Board) generateRandomCell() (int, int) {
 	return mineRow, mineCol
 }
 
-func (b Board) shouldUpdateCellValue(currRow int, currCol int) bool {
+func (b Board) updateCellValue(currRow int, currCol int) {
 	rowLen := len(b)
 	colLen := len(b[0])
 
-	return currRow >= 0 && currRow < rowLen && currCol >= 0 && currCol < colLen && b[currRow][currCol].value != MINE
+	if currRow >= 0 && currRow < rowLen && currCol >= 0 && currCol < colLen && b[currRow][currCol].value != MINE {
+		b[currRow][currCol].value += 1
+	}
+
 }
 
 func createBoard(row int, col int, mines int) Board  {
@@ -63,45 +66,14 @@ func createBoard(row int, col int, mines int) Board  {
 
 		// update mine's neighboring cell
 
-		// N
-		if board.shouldUpdateCellValue(mineRow - 1, mineCol) {
-			board[mineRow-1][mineCol].value += 1
-		}
-		
-		// S
-		if board.shouldUpdateCellValue(mineRow + 1, mineCol) {
-			board[mineRow+1][mineCol].value += 1
-		}
-
-		// W
-		if board.shouldUpdateCellValue(mineRow, mineCol-1) {
-			board[mineRow][mineCol-1].value += 1
-		}
-
-		// E
-		if board.shouldUpdateCellValue(mineRow, mineCol+1) {
-			board[mineRow][mineCol+1].value += 1
-		}
-		
-		// NE
-		if board.shouldUpdateCellValue(mineRow-1, mineCol+1) {
-			board[mineRow-1][mineCol+1].value += 1
-		}
-
-		// NW
-		if board.shouldUpdateCellValue(mineRow-1, mineCol-1) {
-			board[mineRow-1][mineCol-1].value += 1
-		}
-
-		// SE
-		if board.shouldUpdateCellValue(mineRow+1, mineCol+1) {
-			board[mineRow+1][mineCol+1].value += 1
-		}
-
-		// SW
-		if board.shouldUpdateCellValue(mineRow+1, mineCol-1) {
-			board[mineRow+1][mineCol-1].value += 1
-		}
+		board.updateCellValue(mineRow - 1, mineCol) // N
+		board.updateCellValue(mineRow + 1, mineCol) // S
+		board.updateCellValue(mineRow, mineCol-1) // W
+		board.updateCellValue(mineRow, mineCol+1) // E
+		board.updateCellValue(mineRow-1, mineCol+1) // NE
+		board.updateCellValue(mineRow-1, mineCol-1) // NW
+		board.updateCellValue(mineRow+1, mineCol+1) // SE
+		board.updateCellValue(mineRow+1, mineCol-1) // SW
 	}
 
 	return board
@@ -109,5 +81,4 @@ func createBoard(row int, col int, mines int) Board  {
 
 func main() {
 	createBoard(9, 9, 10)
-
 }
