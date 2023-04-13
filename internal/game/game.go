@@ -26,7 +26,7 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
-	var cmd, stopwatchCmd tea.Cmd
+	var cmd, boardCmd, stopwatchCmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -40,8 +40,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.stopwatch, stopwatchCmd = m.stopwatch.Update(msg)
+	m.board, boardCmd = m.board.Update(msg)
 
-	cmds = append(cmds, cmd, stopwatchCmd)
+	cmds = append(cmds, cmd, boardCmd, stopwatchCmd)
 	return m, tea.Batch(cmds...)
 }
 

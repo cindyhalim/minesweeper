@@ -35,7 +35,7 @@ func main() {
 		difficulty = difficultyToBoardSettings[os.Args[1]]
 	}
 	
-	p := tea.NewProgram(game.NewModel(difficulty.row, difficulty.col, difficulty.mines), tea.WithAltScreen())
+	p := tea.NewProgram(game.NewModel(difficulty.row, difficulty.col, difficulty.mines), tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)

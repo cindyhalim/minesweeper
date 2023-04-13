@@ -6,23 +6,9 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 )
-
-var (
-	cellStyle = func(value string) lipgloss.Style {
-		style := lipgloss.NewStyle().Width(5).ColorWhitespace(true).Align(lipgloss.Center).Bold(true).Background(lipgloss.Color("8"))
-
-		if _, ok := textToANSIMap[value]; ok {
-			style = style.Foreground(lipgloss.Color(textToANSIMap[value]))
-		}
-
-		return style
-	}
-
-	rowStyle = func() lipgloss.Style {
-		return lipgloss.NewStyle().PaddingBottom(1).PaddingTop(1).Align(lipgloss.Center).Background(lipgloss.Color("8"))
-	}
-
-	boardStyle = lipgloss.NewStyle().Margin(1)
+const (
+	HIDDEN_COLOR = "#dad8d4"
+	FOCUS_COLOR = "#c2c0bc"
 )
 
 var textToANSIMap = map[string]string {
@@ -36,8 +22,29 @@ var textToANSIMap = map[string]string {
 	"8": "8",
 }
 
+var (
+	cellStyle = func(value string, isInFocus bool) lipgloss.Style {
+		style := lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).ColorWhitespace(true).Align(lipgloss.Center)
 
-func formatCell(value int) string {
+		if _, ok := textToANSIMap[value]; ok {
+			style = style.Foreground(lipgloss.Color(textToANSIMap[value]))
+		}
+
+		if isInFocus {
+			style = style.Background(lipgloss.Color(FOCUS_COLOR)).BorderBackground(lipgloss.Color(FOCUS_COLOR))
+		} else {
+			style = style.Background(lipgloss.Color(HIDDEN_COLOR)).BorderBackground(lipgloss.Color(HIDDEN_COLOR))
+		}
+
+		return style
+	}
+
+	rowStyle = lipgloss.NewStyle()
+	boardStyle = lipgloss.NewStyle().Margin(1)
+)
+
+
+func formatCell(value int, isInFocus bool) string {
 	styledValue := " "
 
 	if value == minesweeper.MINE_CELL {
@@ -46,9 +53,13 @@ func formatCell(value int) string {
 		styledValue = strconv.Itoa(value)
 	}
 
-	return cellStyle(styledValue).Render(styledValue)
+	return cellStyle(styledValue, isInFocus).Render(styledValue)
+}
+
+func makeInline(blocks string, block string) string {
+	return lipgloss.JoinHorizontal(lipgloss.Center, blocks, block)
 }
 
 func formatRow(row string) string {
-	return rowStyle().Render(row) + "\n"
+	return rowStyle.Render(row) + "\n"
 }
