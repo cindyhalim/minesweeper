@@ -1,7 +1,7 @@
 package board
 
 import (
-	"minesweeper/internal/keys"
+	"minesweeper/internal/components/keys"
 	"minesweeper/internal/minesweeper"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -55,6 +55,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return "BOARD!"
+	var board string
+	for i := range m.board {
+		row := ""
+		for j := range m.board[i] {
+			row += formatCell(m.board[i][j].value)
+		}
+		board += formatRow(row)
+	}
+
+	return boardStyle.Render(board)
 }
 

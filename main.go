@@ -21,7 +21,7 @@ func main() {
 	var difficultyToBoardSettings = map[string]BoardSettings{
 		"beginner": {row: 9, col: 9, mines: 10},
 		"intermediate": {row: 16, col: 16, mines: 40},
-		"expert": {row: 30, col: 16, mines: 99},
+		"expert": {row: 16, col: 30, mines: 99},
 	}
 	
 
