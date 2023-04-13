@@ -82,6 +82,26 @@ func (m *Model) cursorRight() {
 	}
 }
 
+func (m *Model) click() {
+	coordinate := m.cursor
+
+	if m.board[coordinate.row][coordinate.col].state == HIDDEN {
+		m.board[coordinate.row][coordinate.col].state = SHOWN
+	}
+}
+
+func (m *Model) flag() {
+	coordinate := m.cursor
+	cellState := &m.board[coordinate.row][coordinate.col].state
+	
+	if *cellState == HIDDEN {
+		*cellState = FLAGGED
+	} else if *cellState == FLAGGED {
+		*cellState = HIDDEN
+	} 
+}
+
+
 func (m Model) Init() tea.Cmd {
 	return nil
 }
@@ -98,6 +118,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.cursorLeft()
 		case key.Matches(msg, m.KeyMap.Right):
 			m.cursorRight()
+		case key.Matches(msg, m.KeyMap.Click):
+			m.click()
+		case key.Matches(msg, m.KeyMap.Flag):
+			m.flag()
 		}
 	}
 
@@ -109,7 +133,7 @@ func (m Model) View() string {
 	for i := range m.board {
 		row := ""
 		for j := range m.board[i] {
-			row = makeInline(row, formatCell(m.board[i][j].value, m.cursor.row == i && m.cursor.col == j))
+			row = makeInline(row, formatCell(m.board[i][j], m.cursor.row == i && m.cursor.col == j))
 		}
 		board += formatRow(row)
 	}

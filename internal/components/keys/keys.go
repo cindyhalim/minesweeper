@@ -10,6 +10,8 @@ type KeyMap struct {
 	Down key.Binding
 	Left key.Binding
 	Right key.Binding
+	Click key.Binding
+	Flag key.Binding
 }
 
 var Keys = KeyMap{
@@ -29,5 +31,13 @@ var Keys = KeyMap{
 	Right: key.NewBinding(
 		key.WithKeys("right", "l"),
 		key.WithHelp("→/l", "move right"),
+	),
+	Click: key.NewBinding(
+		key.WithKeys(" "),
+		key.WithHelp("space", "reveal cell"),
+	),
+	Flag: key.NewBinding(
+		key.WithKeys("x"),
+		key.WithHelp("x", "flag cell"),
 	),
 }

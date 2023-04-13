@@ -9,6 +9,8 @@ import (
 const (
 	HIDDEN_COLOR = "#dad8d4"
 	FOCUS_COLOR = "#c2c0bc"
+	BORDER_LIGHT_COLOR = "#f3f0ec"
+	BORDER_DARK_COLOR = "#61605e"
 )
 
 var textToANSIMap = map[string]string {
@@ -20,11 +22,13 @@ var textToANSIMap = map[string]string {
 	"6": "31",
 	"7": "16",
 	"8": "8",
+	"X": "124",
 }
 
 var (
 	cellStyle = func(value string, isInFocus bool) lipgloss.Style {
-		style := lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).ColorWhitespace(true).Align(lipgloss.Center)
+		style := lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.ThickBorder()).Align(lipgloss.Center).BorderForeground(lipgloss.Color(BORDER_LIGHT_COLOR), lipgloss.Color(BORDER_DARK_COLOR), lipgloss.Color(BORDER_DARK_COLOR), lipgloss.Color(BORDER_LIGHT_COLOR)).ColorWhitespace(true)
+		
 
 		if _, ok := textToANSIMap[value]; ok {
 			style = style.Foreground(lipgloss.Color(textToANSIMap[value]))
@@ -38,19 +42,22 @@ var (
 
 		return style
 	}
-
-	rowStyle = lipgloss.NewStyle()
 	boardStyle = lipgloss.NewStyle().Margin(1)
 )
 
 
-func formatCell(value int, isInFocus bool) string {
+func formatCell(cell Cell, isInFocus bool) string {
 	styledValue := " "
 
-	if value == minesweeper.MINE_CELL {
-		styledValue = "💣"
-	} else if value != minesweeper.EMPTY_CELL {
-		styledValue = strconv.Itoa(value)
+	if cell.state != HIDDEN  {
+		if cell.state == FLAGGED {
+			styledValue = "X"
+			return cellStyle(styledValue, isInFocus).Render(styledValue)
+		} else if cell.value == minesweeper.MINE_CELL {
+			styledValue = "💣"
+		} else if cell.value != minesweeper.EMPTY_CELL {
+			styledValue = strconv.Itoa(cell.value)
+		}
 	}
 
 	return cellStyle(styledValue, isInFocus).Render(styledValue)
@@ -61,5 +68,5 @@ func makeInline(blocks string, block string) string {
 }
 
 func formatRow(row string) string {
-	return rowStyle.Render(row) + "\n"
+	return lipgloss.NewStyle().Render(row) + "\n"
 }
