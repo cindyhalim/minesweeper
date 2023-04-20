@@ -14,6 +14,8 @@ const (
 	HIDDEN CellState = 0
 	SHOWN CellState = 1
 	FLAGGED CellState = 2
+	MINE_CLICKED CellState = 3
+	INCORRECT_FLAG CellState = 4
 )
 
 type Cell struct {
@@ -92,13 +94,21 @@ func (m *Model) revealCells() {
 		currentCell := m.board[coordinate.row][coordinate.col]
 		
 		if currentCell.value == minesweeper.MINE_CELL {
+			m.revealMines()
 			m.endGame()
-		} else if currentCell.value == minesweeper.EMPTY_CELL{
+			return
+		} 
+		
+		if currentCell.value == minesweeper.EMPTY_CELL{
 			m.revealEmptyCells()
 		}
 
 		m.board[coordinate.row][coordinate.col].state = SHOWN
 	}
+}
+
+func isInBound (board [][]Cell, row int, col int) bool {
+	return row >= 0 && col >= 0 && row < len(board) && col < len(board[0])
 }
 
 func (m *Model) revealEmptyCells() {
@@ -112,7 +122,7 @@ func (m *Model) revealEmptyCells() {
 		col := cellCoordinates.col
 		
 
-		if row >= 0 && col >= 0 && row < len(m.board) && col < len(m.board[0]) {
+		if isInBound(m.board, row, col) {
 			if m.board[row][col].value == minesweeper.EMPTY_CELL && m.board[row][col].state == HIDDEN {
 				queue = append(queue,
 					coordinate{row: row-1, col: col},
@@ -128,6 +138,20 @@ func (m *Model) revealEmptyCells() {
 			m.board[row][col].state = SHOWN
 		}
 	}
+}
+
+func (m *Model) revealMines() {
+	for i := range m.board {
+		for j := range m.board[i] {
+			if m.board[i][j].value == minesweeper.MINE_CELL && m.board[i][j].state == FLAGGED {
+				m.board[i][j].state = INCORRECT_FLAG
+			} else if m.board[i][j].value == minesweeper.MINE_CELL {
+				m.board[i][j].state = SHOWN
+			}
+		}
+	}
+
+	m.board[m.cursor.row][m.cursor.col].state = MINE_CLICKED
 }
 
 func (m *Model) endGame() tea.Cmd {

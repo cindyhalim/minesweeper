@@ -11,6 +11,7 @@ const (
 	FOCUS_COLOR = lipgloss.Color("#c2c0bc")
 	SHOWN_COLOR = lipgloss.Color("#adadac")
 	ERROR_COLOR = lipgloss.Color("#eb4034")
+	INCORRECT_FLAG_COLOR = lipgloss.Color("#fa857d")
 )
 
 var textToANSIMap = map[string]string {
@@ -26,9 +27,16 @@ var textToANSIMap = map[string]string {
 }
 
 var (
-	cellStyle = func(value string, cellState CellState, isInFocus bool) lipgloss.Style {
-		style := lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).Align(lipgloss.Center).ColorWhitespace(true)
-		
+	baseCellStyle = lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).Align(lipgloss.Center).ColorWhitespace(true)
+	hiddenCellStyle = func(isInFocus bool) lipgloss.Style {
+		if isInFocus {
+			return baseCellStyle.Background(FOCUS_COLOR).BorderBackground(FOCUS_COLOR)
+		} else {
+			return baseCellStyle.Background(HIDDEN_COLOR).BorderBackground(HIDDEN_COLOR)
+		}
+	} 
+	shownCellStyle = func(value string, isInFocus bool) lipgloss.Style {
+		style := baseCellStyle
 
 		if _, ok := textToANSIMap[value]; ok {
 			style = style.Foreground(lipgloss.Color(textToANSIMap[value]))
@@ -36,37 +44,53 @@ var (
 
 
 		if isInFocus {
-			style = style.Background(FOCUS_COLOR).BorderBackground(FOCUS_COLOR)
-		} else if cellState == SHOWN {
-			style = style.Background(SHOWN_COLOR).BorderBackground(SHOWN_COLOR)
+			return style.Background(FOCUS_COLOR).BorderBackground(FOCUS_COLOR)
 		} else {
-			style = style.Background(HIDDEN_COLOR).BorderBackground(HIDDEN_COLOR)
+			return style.Background(SHOWN_COLOR).BorderBackground(SHOWN_COLOR)
 		}
-
-		return style
+	}
+	mineClickedCellStyle = func() lipgloss.Style {
+		return baseCellStyle.Background(ERROR_COLOR).BorderBackground(ERROR_COLOR)
+	}
+	incorrectFlagCellStyle = func() lipgloss.Style {
+		return baseCellStyle.Background(INCORRECT_FLAG_COLOR).BorderBackground(INCORRECT_FLAG_COLOR)
 	}
 	boardStyle = lipgloss.NewStyle().Margin(1)
 )
 
+func getValue (value int, state CellState) string {
+	if state == FLAGGED {
+		return "X"
+	}
+	if value == minesweeper.MINE_CELL {
+		return "💣"
+	}
+	if value == minesweeper.EMPTY_CELL {
+		return " "
+	}
+	return strconv.Itoa(value)
+}
 
 func formatCell(cell Cell, isInFocus bool) string {
-	styledValue := " "
 
-
-	if cell.state != HIDDEN  {
-		if cell.state == FLAGGED {
-			styledValue = "X"
-			return cellStyle(styledValue, cell.state, isInFocus).Render(styledValue)
-		} else if cell.value == minesweeper.MINE_CELL {
-			styledValue = "💣"
-			return cellStyle(styledValue, cell.state, isInFocus).Background(ERROR_COLOR).BorderBackground(ERROR_COLOR).Render(styledValue)
-		} else if cell.value != minesweeper.EMPTY_CELL {
-			styledValue = strconv.Itoa(cell.value)
-		}
+	if cell.state == HIDDEN {
+		hiddenValue := " "
+		return hiddenCellStyle(isInFocus).Render(hiddenValue)
 	}
 
-	return cellStyle(styledValue, cell.state, isInFocus).Render(styledValue)
+	formattedValue := getValue(cell.value, cell.state)
+	if cell.state == MINE_CLICKED {
+		return mineClickedCellStyle().Render(formattedValue)
+	}
+
+	if cell.state == INCORRECT_FLAG {
+		return incorrectFlagCellStyle().Render(formattedValue)
+	}
+
+	return shownCellStyle(formattedValue, isInFocus).Render(formattedValue)
+
 }
+
 
 func makeInline(blocks string, block string) string {
 	return lipgloss.JoinHorizontal(lipgloss.Center, blocks, block)
