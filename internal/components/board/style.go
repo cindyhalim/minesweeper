@@ -7,10 +7,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 const (
-	HIDDEN_COLOR = "#dad8d4"
-	FOCUS_COLOR = "#c2c0bc"
-	BORDER_LIGHT_COLOR = "#f3f0ec"
-	BORDER_DARK_COLOR = "#61605e"
+	HIDDEN_COLOR = lipgloss.Color("#dad8d4")
+	FOCUS_COLOR = lipgloss.Color("#c2c0bc")
+	SHOWN_COLOR = lipgloss.Color("#adadac")
+	ERROR_COLOR = lipgloss.Color("#eb4034")
 )
 
 var textToANSIMap = map[string]string {
@@ -26,18 +26,21 @@ var textToANSIMap = map[string]string {
 }
 
 var (
-	cellStyle = func(value string, isInFocus bool) lipgloss.Style {
-		style := lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.ThickBorder()).Align(lipgloss.Center).BorderForeground(lipgloss.Color(BORDER_LIGHT_COLOR), lipgloss.Color(BORDER_DARK_COLOR), lipgloss.Color(BORDER_DARK_COLOR), lipgloss.Color(BORDER_LIGHT_COLOR)).ColorWhitespace(true)
+	cellStyle = func(value string, cellState CellState, isInFocus bool) lipgloss.Style {
+		style := lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).Align(lipgloss.Center).ColorWhitespace(true)
 		
 
 		if _, ok := textToANSIMap[value]; ok {
 			style = style.Foreground(lipgloss.Color(textToANSIMap[value]))
 		}
 
+
 		if isInFocus {
-			style = style.Background(lipgloss.Color(FOCUS_COLOR)).BorderBackground(lipgloss.Color(FOCUS_COLOR))
+			style = style.Background(FOCUS_COLOR).BorderBackground(FOCUS_COLOR)
+		} else if cellState == SHOWN {
+			style = style.Background(SHOWN_COLOR).BorderBackground(SHOWN_COLOR)
 		} else {
-			style = style.Background(lipgloss.Color(HIDDEN_COLOR)).BorderBackground(lipgloss.Color(HIDDEN_COLOR))
+			style = style.Background(HIDDEN_COLOR).BorderBackground(HIDDEN_COLOR)
 		}
 
 		return style
@@ -49,18 +52,20 @@ var (
 func formatCell(cell Cell, isInFocus bool) string {
 	styledValue := " "
 
+
 	if cell.state != HIDDEN  {
 		if cell.state == FLAGGED {
 			styledValue = "X"
-			return cellStyle(styledValue, isInFocus).Render(styledValue)
+			return cellStyle(styledValue, cell.state, isInFocus).Render(styledValue)
 		} else if cell.value == minesweeper.MINE_CELL {
 			styledValue = "💣"
+			return cellStyle(styledValue, cell.state, isInFocus).Background(ERROR_COLOR).BorderBackground(ERROR_COLOR).Render(styledValue)
 		} else if cell.value != minesweeper.EMPTY_CELL {
 			styledValue = strconv.Itoa(cell.value)
 		}
 	}
 
-	return cellStyle(styledValue, isInFocus).Render(styledValue)
+	return cellStyle(styledValue, cell.state, isInFocus).Render(styledValue)
 }
 
 func makeInline(blocks string, block string) string {

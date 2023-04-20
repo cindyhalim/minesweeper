@@ -24,6 +24,9 @@ type Cell struct {
 type coordinate struct {
 	row, col int
 }
+
+type GameEnd struct {}
+
 type Model struct {
 	board [][]Cell
 	KeyMap keys.KeyMap
@@ -82,11 +85,54 @@ func (m *Model) cursorRight() {
 	}
 }
 
-func (m *Model) click() {
+func (m *Model) revealCells() {
 	coordinate := m.cursor
 
 	if m.board[coordinate.row][coordinate.col].state == HIDDEN {
+		currentCell := m.board[coordinate.row][coordinate.col]
+		
+		if currentCell.value == minesweeper.MINE_CELL {
+			m.endGame()
+		} else if currentCell.value == minesweeper.EMPTY_CELL{
+			m.revealEmptyCells()
+		}
+
 		m.board[coordinate.row][coordinate.col].state = SHOWN
+	}
+}
+
+func (m *Model) revealEmptyCells() {
+	queue := []coordinate{}
+	queue = append(queue, coordinate{row: m.cursor.row, col: m.cursor.col})
+
+	for len(queue) > 0 {
+		cellCoordinates := queue[0]
+		queue = queue[1:]
+		row := cellCoordinates.row
+		col := cellCoordinates.col
+		
+
+		if row >= 0 && col >= 0 && row < len(m.board) && col < len(m.board[0]) {
+			if m.board[row][col].value == minesweeper.EMPTY_CELL && m.board[row][col].state == HIDDEN {
+				queue = append(queue,
+					coordinate{row: row-1, col: col},
+					coordinate{row: row+1, col: col},
+					coordinate{row: row, col: col-1},
+					coordinate{row: row, col: col+1},
+					coordinate{row: row-1, col: col-1},
+					coordinate{row: row-1, col: col+1},
+					coordinate{row: row+1, col: col-1},
+					coordinate{row: row+1, col: col+1},
+				)
+			}
+			m.board[row][col].state = SHOWN
+		}
+	}
+}
+
+func (m *Model) endGame() tea.Cmd {
+	return func() tea.Msg {
+		return GameEnd{}
 	}
 }
 
@@ -100,7 +146,6 @@ func (m *Model) flag() {
 		*cellState = HIDDEN
 	} 
 }
-
 
 func (m Model) Init() tea.Cmd {
 	return nil
@@ -119,7 +164,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.KeyMap.Right):
 			m.cursorRight()
 		case key.Matches(msg, m.KeyMap.Click):
-			m.click()
+			m.revealCells()
 		case key.Matches(msg, m.KeyMap.Flag):
 			m.flag()
 		}
