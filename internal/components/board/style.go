@@ -27,6 +27,7 @@ var textToANSIMap = map[string]string {
 }
 
 var (
+	headerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Bold(true).Align(lipgloss.Center)
 	baseCellStyle = lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).Align(lipgloss.Center).ColorWhitespace(true)
 	hiddenCellStyle = func(isInFocus bool) lipgloss.Style {
 		if isInFocus {

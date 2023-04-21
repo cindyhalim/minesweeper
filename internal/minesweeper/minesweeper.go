@@ -7,7 +7,7 @@ import (
 
 type CellState int
 type CellValue int
-type Coordinate struct {
+type coordinate struct {
 	row int
 	col int
 }
@@ -15,7 +15,6 @@ type Cell struct {
 	Value CellValue
 	State CellState
 }
-
 type Board [][]Cell 
 
 const (
@@ -56,8 +55,8 @@ func (b Board) updateCellValue(currRow int, currCol int) {
 }
 
 func (board Board) revealEmptyCells( row int, col int) {
-	queue := []Coordinate{}
-	queue = append(queue, Coordinate{row, col})
+	queue := []coordinate{}
+	queue = append(queue, coordinate{row, col})
 
 	for len(queue) > 0 {
 		cellCoordinates := queue[0]
@@ -69,14 +68,14 @@ func (board Board) revealEmptyCells( row int, col int) {
 		if isInBound(board, row, col) {
 			if board[row][col].Value == EMPTY_CELL && board[row][col].State == HIDDEN {
 				queue = append(queue,
-					Coordinate{row: row-1, col: col},
-					Coordinate{row: row+1, col: col},
-					Coordinate{row: row, col: col-1},
-					Coordinate{row: row, col: col+1},
-					Coordinate{row: row-1, col: col-1},
-					Coordinate{row: row-1, col: col+1},
-					Coordinate{row: row+1, col: col-1},
-					Coordinate{row: row+1, col: col+1},
+					coordinate{row: row-1, col: col},
+					coordinate{row: row+1, col: col},
+					coordinate{row: row, col: col-1},
+					coordinate{row: row, col: col+1},
+					coordinate{row: row-1, col: col-1},
+					coordinate{row: row-1, col: col+1},
+					coordinate{row: row+1, col: col-1},
+					coordinate{row: row+1, col: col+1},
 				)
 			}
 			board[row][col].State = SHOWN

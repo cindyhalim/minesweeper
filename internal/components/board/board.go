@@ -2,10 +2,13 @@ package board
 
 import (
 	"minesweeper/internal/components/keys"
+	"minesweeper/internal/components/stopwatch"
 	"minesweeper/internal/minesweeper"
+	"strconv"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type coordinate struct {
@@ -13,10 +16,13 @@ type coordinate struct {
 }
 
 type GameEnd struct {}
+type GameStart struct {}
 
 type Model struct {
 	mines int
+	flagsRemaining int
 	board minesweeper.Board
+	stopwatch stopwatch.Model
 	KeyMap keys.KeyMap
 	isFirstClick bool
 	cursor coordinate
@@ -30,7 +36,9 @@ func NewModel(rows int, cols int, mines int) Model {
 
 	return Model{
 		mines: mines,
+		flagsRemaining: mines,
 		board: board,
+		stopwatch: stopwatch.NewModel(),
 		KeyMap: keys.Keys,
 		isFirstClick: true,
 	}
@@ -69,6 +77,12 @@ func (m *Model) cursorRight() {
 	}
 }
 
+func (m *Model) startGame() tea.Cmd {
+	return func() tea.Msg {
+		return GameStart{}
+	}
+}
+
 func (m *Model) endGame() tea.Cmd {
 	return func() tea.Msg {
 		return GameEnd{}
@@ -91,6 +105,9 @@ func (m *Model) getBoard() {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	var cmd, stopwatchCmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -106,14 +123,22 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			if m.isFirstClick {
 				m.getBoard()
 				m.isFirstClick = false
+				cmd = m.stopwatch.Init()
 			} 
 			minesweeper.RevealCells(&m.board, m.cursor.row, m.cursor.col)
 		case key.Matches(msg, m.KeyMap.Flag):
 			minesweeper.ToggleFlag(&m.board, m.cursor.row, m.cursor.col)
+			if m.board[m.cursor.row][m.cursor.col].State == minesweeper.FLAGGED {
+				m.flagsRemaining--
+			} else {
+				m.flagsRemaining++
+			}
 		}
 	}
+	m.stopwatch, stopwatchCmd = m.stopwatch.Update(msg)
+	cmds = append(cmds, cmd, stopwatchCmd)
 
-	return m, nil
+	return m, tea.Batch(cmds...)
 }
 
 func (m Model) View() string {
@@ -126,6 +151,13 @@ func (m Model) View() string {
 		board += formatRow(row)
 	}
 
-	return boardStyle.Render(board)
+	
+	flagsRemaining := "🚩 remaining: " + strconv.Itoa(m.flagsRemaining)
+
+	headerView := headerStyle.Render(flagsRemaining+"      ", m.stopwatch.View())
+
+	mainView := lipgloss.JoinVertical(lipgloss.Center, headerView, boardStyle.Render(board))
+
+	return mainView
 }
 
