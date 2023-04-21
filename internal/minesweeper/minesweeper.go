@@ -36,14 +36,27 @@ func (b Board) updateCellValue(currRow int, currCol int) {
 
 }
 
-func New(row int, col int, mines int) Board {
-	board := make (Board, row)
+func New(width int, height int, row int, col int, mines int) Board {
+	board := make (Board, width)
 	for i := range board {
-		board[i] = make([]int, col)
+		board[i] = make([]int, height)
 	}
 
 	for i := 0; i < mines; i++ {
 		mineRow, mineCol := board.getRandomCell()
+
+		// ensure first clicked cell and adjacent cells isn't a mine
+		for mineRow == row && mineCol == col ||
+		mineRow == row-1 && mineCol == col ||
+		mineRow == row+1 && mineCol == col ||
+		mineRow == row && mineCol == col-1 ||
+		mineRow == row && mineCol == col+1 ||
+		mineRow == row-1 && mineCol == col-1 ||
+		mineRow == row-1 && mineCol == col+1 ||
+		mineRow == row+1 && mineCol == col-1 ||
+		mineRow == row+1 && mineCol == col+1 {
+			mineRow, mineCol = board.getRandomCell()
+		}
 
 		// ensure generated cell doesn't already contain mine
 		for board[mineRow][mineCol] == MINE_CELL {

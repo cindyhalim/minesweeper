@@ -30,27 +30,24 @@ type coordinate struct {
 type GameEnd struct {}
 
 type Model struct {
+	mines int
 	board [][]Cell
 	KeyMap keys.KeyMap
+	isFirstClick bool
 	cursor coordinate
 }
 
 func NewModel(rows int, cols int, mines int) Model {
-	minesweeper := minesweeper.New(rows, cols, mines)
 	board := make([][]Cell, rows)
 	for i := range board {
 		board[i] = make([]Cell, cols)
 	}
 
-	for i := range minesweeper {
-		for j := range minesweeper[i] {
-			board[i][j].value = minesweeper[i][j]
-		}
-	}
-
 	return Model{
+		mines: mines,
 		board: board,
 		KeyMap: keys.Keys,
+		isFirstClick: true,
 	}
 }
 
@@ -143,9 +140,9 @@ func (m *Model) revealEmptyCells() {
 func (m *Model) revealMines() {
 	for i := range m.board {
 		for j := range m.board[i] {
-			if m.board[i][j].value == minesweeper.MINE_CELL && m.board[i][j].state == FLAGGED {
+			if m.board[i][j].value != minesweeper.MINE_CELL && m.board[i][j].state == FLAGGED {
 				m.board[i][j].state = INCORRECT_FLAG
-			} else if m.board[i][j].value == minesweeper.MINE_CELL {
+			} else if m.board[i][j].value == minesweeper.MINE_CELL && m.board[i][j].state != FLAGGED {
 				m.board[i][j].state = SHOWN
 			}
 		}
@@ -175,6 +172,17 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+func (m *Model) getBoard() {
+	width := len(m.board)
+	height := len(m.board[0])
+	minesweeper := minesweeper.New(width, height, m.cursor.row, m.cursor.col, m.mines)
+	for i := range minesweeper {
+		for j := range minesweeper[i] {
+			m.board[i][j].value = minesweeper[i][j]
+		}
+	}
+}
+
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -188,6 +196,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.KeyMap.Right):
 			m.cursorRight()
 		case key.Matches(msg, m.KeyMap.Click):
+			if m.isFirstClick {
+				m.getBoard()
+				m.isFirstClick = false
+			} 
 			m.revealCells()
 		case key.Matches(msg, m.KeyMap.Flag):
 			m.flag()

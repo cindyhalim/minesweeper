@@ -60,7 +60,7 @@ var (
 
 func getValue (value int, state CellState) string {
 	if state == FLAGGED {
-		return "X"
+		return "🚩"
 	}
 	if value == minesweeper.MINE_CELL {
 		return "💣"
