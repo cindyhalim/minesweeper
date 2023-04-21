@@ -58,8 +58,8 @@ var (
 	boardStyle = lipgloss.NewStyle().Margin(1)
 )
 
-func getValue (value int, state CellState) string {
-	if state == FLAGGED {
+func getValue (value minesweeper.CellValue, state minesweeper.CellState) string {
+	if state == minesweeper.FLAGGED {
 		return "🚩"
 	}
 	if value == minesweeper.MINE_CELL {
@@ -68,27 +68,26 @@ func getValue (value int, state CellState) string {
 	if value == minesweeper.EMPTY_CELL {
 		return " "
 	}
-	return strconv.Itoa(value)
+	return strconv.Itoa(int(value))
 }
 
-func formatCell(cell Cell, isInFocus bool) string {
-
-	if cell.state == HIDDEN {
+func formatCell(cell minesweeper.Cell, isInFocus bool) string {
+	
+	if cell.State == minesweeper.HIDDEN {
 		hiddenValue := " "
 		return hiddenCellStyle(isInFocus).Render(hiddenValue)
 	}
 
-	formattedValue := getValue(cell.value, cell.state)
-	if cell.state == MINE_CLICKED {
+	formattedValue := getValue(cell.Value, cell.State)
+	if cell.State == minesweeper.MINE_CLICKED {
 		return mineClickedCellStyle().Render(formattedValue)
 	}
 
-	if cell.state == INCORRECT_FLAG {
+	if cell.State == minesweeper.INCORRECT_FLAG {
 		return incorrectFlagCellStyle().Render(formattedValue)
 	}
 
 	return shownCellStyle(formattedValue, isInFocus).Render(formattedValue)
-
 }
 
 
