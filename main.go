@@ -14,8 +14,6 @@ type BoardSettings struct {
 	mines int
 }
 
-
-
 func main() {
 	var difficulty BoardSettings
 	var difficultyToBoardSettings = map[string]BoardSettings{
@@ -24,7 +22,6 @@ func main() {
 		"expert": {row: 16, col: 30, mines: 99},
 	}
 	
-
 	if len(os.Args) < 2 {
 		difficulty = difficultyToBoardSettings["beginner"]
 	} else {

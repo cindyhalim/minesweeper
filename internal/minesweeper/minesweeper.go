@@ -162,10 +162,9 @@ func RevealCells(b *Board, row int, col int) {
 
 func ToggleFlag(b *Board, row int, col int) {
 	board := *b
-
 	cellState := &board[row][col].State
-	
-	if *cellState == HIDDEN {
+
+	if *cellState == HIDDEN  {
 		*cellState = FLAGGED
 	} else if *cellState == FLAGGED {
 		*cellState = HIDDEN

@@ -15,7 +15,6 @@ type Model struct {
 	width, height int
 }
 
-
 func (m Model) Init() tea.Cmd {
 	return nil
 }
@@ -34,9 +33,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 	}
-
 	m.board, boardCmd = m.board.Update(msg)
-
 	cmds = append(cmds, cmd, boardCmd)
 	return m, tea.Batch(cmds...)
 }

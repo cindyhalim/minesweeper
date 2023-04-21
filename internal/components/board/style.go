@@ -43,7 +43,6 @@ var (
 			style = style.Foreground(lipgloss.Color(textToANSIMap[value]))
 		}
 
-
 		if isInFocus {
 			return style.Background(FOCUS_COLOR).BorderBackground(FOCUS_COLOR)
 		} else {
@@ -69,6 +68,7 @@ func getValue (value minesweeper.CellValue, state minesweeper.CellState) string 
 	if value == minesweeper.EMPTY_CELL {
 		return " "
 	}
+	
 	return strconv.Itoa(int(value))
 }
 

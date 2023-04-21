@@ -16,32 +16,15 @@ type coordinate struct {
 }
 
 type GameEnd struct {}
-type GameStart struct {}
 
 type Model struct {
-	mines int
+	totalMines int
 	flagsRemaining int
 	board minesweeper.Board
 	stopwatch stopwatch.Model
 	KeyMap keys.KeyMap
 	isFirstClick bool
 	cursor coordinate
-}
-
-func NewModel(rows int, cols int, mines int) Model {
-	board := make(minesweeper.Board, rows)
-	for i := range board {
-		board[i] = make([]minesweeper.Cell, cols)
-	}
-
-	return Model{
-		mines: mines,
-		flagsRemaining: mines,
-		board: board,
-		stopwatch: stopwatch.NewModel(),
-		KeyMap: keys.Keys,
-		isFirstClick: true,
-	}
 }
 
 func (m *Model) cursorUp() {
@@ -51,7 +34,6 @@ func (m *Model) cursorUp() {
 		m.cursor.row = 0
 	}
 }
-
 
 func (m *Model) cursorDown() {
 	if m.cursor.row < len(m.board) {
@@ -77,31 +59,45 @@ func (m *Model) cursorRight() {
 	}
 }
 
-func (m *Model) startGame() tea.Cmd {
-	return func() tea.Msg {
-		return GameStart{}
+func createEmptyBoard(rows int, cols int) minesweeper.Board {
+	board := make(minesweeper.Board, rows)
+	for i := range board {
+		board[i] = make([]minesweeper.Cell, cols)
 	}
+
+	return board
 }
 
-func (m *Model) endGame() tea.Cmd {
-	return func() tea.Msg {
-		return GameEnd{}
-	}
-}
-
-func (m Model) Init() tea.Cmd {
-	return nil
-}
-
-func (m *Model) getBoard() {
+func (m *Model) fillBoard() {
 	width := len(m.board)
 	height := len(m.board[0])
-	minesweeper := minesweeper.New(width, height, m.cursor.row, m.cursor.col, m.mines)
+	minesweeper := minesweeper.New(width, height, m.cursor.row, m.cursor.col, m.totalMines)
 	for i := range minesweeper {
 		for j := range minesweeper[i] {
 			m.board[i][j].Value = minesweeper[i][j].Value
 		}
 	}
+}
+
+func (m *Model) resetBoard() {
+	rows := len(m.board)
+	cols := len(m.board[0])
+	m.board = createEmptyBoard(rows, cols)
+	m.flagsRemaining = m.totalMines
+	m.isFirstClick = true
+	m.stopwatch = stopwatch.NewModel()
+}
+
+func (m *Model) countFlagsRemaining() {
+	if m.board[m.cursor.row][m.cursor.col].State == minesweeper.FLAGGED {
+		m.flagsRemaining--
+	} else if m.board[m.cursor.row][m.cursor.col].State == minesweeper.HIDDEN {
+		m.flagsRemaining++
+	}
+}
+
+func (m Model) Init() tea.Cmd {
+	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -121,18 +117,16 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.cursorRight()
 		case key.Matches(msg, m.KeyMap.Click):
 			if m.isFirstClick {
-				m.getBoard()
+				m.fillBoard()
 				m.isFirstClick = false
 				cmd = m.stopwatch.Init()
 			} 
 			minesweeper.RevealCells(&m.board, m.cursor.row, m.cursor.col)
 		case key.Matches(msg, m.KeyMap.Flag):
 			minesweeper.ToggleFlag(&m.board, m.cursor.row, m.cursor.col)
-			if m.board[m.cursor.row][m.cursor.col].State == minesweeper.FLAGGED {
-				m.flagsRemaining--
-			} else {
-				m.flagsRemaining++
-			}
+			m.countFlagsRemaining()
+		case key.Matches(msg, m.KeyMap.Reset):
+			m.resetBoard()
 		}
 	}
 	m.stopwatch, stopwatchCmd = m.stopwatch.Update(msg)
@@ -150,14 +144,25 @@ func (m Model) View() string {
 		}
 		board += formatRow(row)
 	}
-
 	
-	flagsRemaining := "🚩 remaining: " + strconv.Itoa(m.flagsRemaining)
-
-	headerView := headerStyle.Render(flagsRemaining+"      ", m.stopwatch.View())
-
+	flagsRemainingText := "🚩 remaining: " + strconv.Itoa(m.flagsRemaining)
+	headerView := headerStyle.Render(flagsRemainingText+"      ", m.stopwatch.View())
 	mainView := lipgloss.JoinVertical(lipgloss.Center, headerView, boardStyle.Render(board))
 
 	return mainView
+}
+
+
+func NewModel(rows int, cols int, mines int) Model {
+	board := createEmptyBoard(rows, cols)
+	
+	return Model{
+		totalMines: mines,
+		flagsRemaining: mines,
+		board: board,
+		stopwatch: stopwatch.NewModel(),
+		KeyMap: keys.Keys,
+		isFirstClick: true,
+	}
 }
 

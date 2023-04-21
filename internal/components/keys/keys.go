@@ -12,6 +12,7 @@ type KeyMap struct {
 	Right key.Binding
 	Click key.Binding
 	Flag key.Binding
+	Reset key.Binding
 }
 
 var Keys = KeyMap{
@@ -39,5 +40,9 @@ var Keys = KeyMap{
 	Flag: key.NewBinding(
 		key.WithKeys("x"),
 		key.WithHelp("x", "flag cell"),
+	),
+	Reset: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reset board"),
 	),
 }
