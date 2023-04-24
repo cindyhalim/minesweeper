@@ -15,7 +15,8 @@ type coordinate struct {
 	row, col int
 }
 
-type GameEnd struct {}
+type GameWin struct {}
+type GameLose struct {}
 
 type Model struct {
 	totalMines int
@@ -79,15 +80,6 @@ func (m *Model) fillBoard() {
 	}
 }
 
-func (m *Model) resetBoard() {
-	rows := len(m.board)
-	cols := len(m.board[0])
-	m.board = createEmptyBoard(rows, cols)
-	m.flagsRemaining = m.totalMines
-	m.isFirstClick = true
-	m.stopwatch = stopwatch.NewModel()
-}
-
 func (m *Model) countFlagsRemaining() {
 	if m.board[m.cursor.row][m.cursor.col].State == minesweeper.FLAGGED {
 		m.flagsRemaining--
@@ -98,6 +90,18 @@ func (m *Model) countFlagsRemaining() {
 
 func (m Model) Init() tea.Cmd {
 	return nil
+}
+
+func (m *Model) gameLose() tea.Cmd {
+	return func() tea.Msg {
+		return GameLose{}
+	}
+}
+
+func (m *Model) gameWin() tea.Cmd {
+	return func() tea.Msg {
+		return GameWin{}
+	}
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -122,17 +126,44 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				cmd = m.stopwatch.Init()
 			} 
 			minesweeper.RevealCells(&m.board, m.cursor.row, m.cursor.col)
+
+			if m.board[m.cursor.row][m.cursor.col].Value == minesweeper.MINE_CELL {
+				return m, m.gameLose()
+			}
+	
+			if m.flagsRemaining == 0 {
+				if m.checkBoard() {
+					return m, m.gameWin()
+				}
+			}
+			
 		case key.Matches(msg, m.KeyMap.Flag):
 			minesweeper.ToggleFlag(&m.board, m.cursor.row, m.cursor.col)
 			m.countFlagsRemaining()
-		case key.Matches(msg, m.KeyMap.Reset):
-			m.resetBoard()
 		}
 	}
 	m.stopwatch, stopwatchCmd = m.stopwatch.Update(msg)
 	cmds = append(cmds, cmd, stopwatchCmd)
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m Model) checkBoard() bool {
+	for i := range m.board {
+		for j := range m.board[i] {
+			cell := m.board[i][j]
+
+			if cell.Value == minesweeper.EMPTY_CELL && cell.State != minesweeper.SHOWN {
+				return false
+			}
+
+			if cell.Value == minesweeper.MINE_CELL && cell.State != minesweeper.FLAGGED {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func (m Model) View() string {

@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+type Mode struct {
+	Rows int
+	Cols int
+	Mines int
+}
+
 type CellState int
 type CellValue int
 type coordinate struct {
@@ -16,6 +22,12 @@ type Cell struct {
 	State CellState
 }
 type Board [][]Cell 
+
+var (
+	BEGINNER = Mode{Rows: 9, Cols: 9, Mines: 10}
+	INTERMEDIATE = Mode{Rows: 16, Cols: 16, Mines: 40}
+	EXPERT = Mode{Rows: 16, Cols: 30, Mines: 99}
+)
 
 const (
 	MINE_CELL CellValue = -1	
@@ -51,7 +63,6 @@ func (b Board) updateCellValue(currRow int, currCol int) {
 	if currRow >= 0 && currRow < rowLen && currCol >= 0 && currCol < colLen && b[currRow][currCol].Value != MINE_CELL {
 		b[currRow][currCol].Value += 1
 	}
-
 }
 
 func (board Board) revealEmptyCells( row int, col int) {
@@ -108,7 +119,7 @@ func New(width int, height int, row int, col int, mines int) Board {
 		mineRow, mineCol := board.getRandomCell()
 
 		// ensure first clicked cell and adjacent cells isn't a mine
-		for mineRow == row && mineCol == col ||
+		if mineRow == row && mineCol == col ||
 		mineRow == row-1 && mineCol == col ||
 		mineRow == row+1 && mineCol == col ||
 		mineRow == row && mineCol == col-1 ||
@@ -127,7 +138,7 @@ func New(width int, height int, row int, col int, mines int) Board {
 		
 		board[mineRow][mineCol].Value = MINE_CELL
 
-		// update mine's neighboring cell
+		// update mine's adjacent cells
 		board.updateCellValue(mineRow - 1, mineCol) // N
 		board.updateCellValue(mineRow + 1, mineCol) // S
 		board.updateCellValue(mineRow, mineCol-1) // W
