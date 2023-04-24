@@ -2,6 +2,7 @@ package game
 
 import (
 	"minesweeper/internal/components/board"
+	"minesweeper/internal/components/help"
 	"minesweeper/internal/components/keys"
 	"minesweeper/internal/minesweeper"
 
@@ -21,6 +22,7 @@ const (
 type Model struct {
 	mode minesweeper.Mode
 	board board.Model
+	help help.Model
 	status GameStatus
 	highScore int
 	width, height int
@@ -32,7 +34,7 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
-	var cmd, boardCmd tea.Cmd
+	var cmd, boardCmd, helpCmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -50,11 +52,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case board.GameLose:
 		m.status = LOSE
 	}
-	
+	m.help, helpCmd = m.help.Update(msg)
 	if m.status == IN_PROGRESS {
 		m.board, boardCmd = m.board.Update(msg)
 	}
-	cmds = append(cmds, cmd, boardCmd)
+	
+	cmds = append(cmds, cmd, boardCmd, helpCmd)
 	return m, tea.Batch(cmds...)
 }
 
@@ -66,7 +69,7 @@ func (m *Model) resetGame() {
 func (m Model) View() string {
 	boardView := lipgloss.JoinVertical(lipgloss.Center, m.board.View())
 	statusView := formatGameStatus(m.status)
-	mainView := lipgloss.JoinVertical(lipgloss.Center, statusView, boardView)
+	mainView := lipgloss.JoinVertical(lipgloss.Center, statusView, boardView, m.help.View() )
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, mainView)
 }
 
@@ -75,6 +78,7 @@ func NewModel(mode minesweeper.Mode) Model {
 		mode: mode, 
 		highScore: 0,
 		board: board.NewModel(mode.Rows, mode.Cols, mode.Mines),
+		help: help.NewModel(),
 		status: IN_PROGRESS,
 	}
 }

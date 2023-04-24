@@ -23,7 +23,6 @@ type Model struct {
 	flagsRemaining int
 	board minesweeper.Board
 	stopwatch stopwatch.Model
-	KeyMap keys.KeyMap
 	isFirstClick bool
 	cursor coordinate
 }
@@ -111,15 +110,15 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.KeyMap.Up):
+		case key.Matches(msg, keys.Keys.Up):
 			m.cursorUp()
-		case key.Matches(msg, m.KeyMap.Down):
+		case key.Matches(msg, keys.Keys.Down):
 			m.cursorDown()
-		case key.Matches(msg, m.KeyMap.Left):
+		case key.Matches(msg, keys.Keys.Left):
 			m.cursorLeft()
-		case key.Matches(msg, m.KeyMap.Right):
+		case key.Matches(msg, keys.Keys.Right):
 			m.cursorRight()
-		case key.Matches(msg, m.KeyMap.Click):
+		case key.Matches(msg, keys.Keys.Click):
 			if m.isFirstClick {
 				m.fillBoard()
 				m.isFirstClick = false
@@ -135,7 +134,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				return m, m.gameWin()
 			}
 
-		case key.Matches(msg, m.KeyMap.Flag):
+		case key.Matches(msg, keys.Keys.Flag):
 			minesweeper.ToggleFlag(&m.board, m.cursor.row, m.cursor.col)
 			m.countFlagsRemaining()
 		}
@@ -190,7 +189,6 @@ func NewModel(rows int, cols int, mines int) Model {
 		flagsRemaining: mines,
 		board: board,
 		stopwatch: stopwatch.NewModel(),
-		KeyMap: keys.Keys,
 		isFirstClick: true,
 	}
 }

@@ -13,6 +13,7 @@ type KeyMap struct {
 	Click key.Binding
 	Flag key.Binding
 	Reset key.Binding
+	Help key.Binding
 }
 
 var Keys = KeyMap{
@@ -45,4 +46,20 @@ var Keys = KeyMap{
 		key.WithKeys("r"),
 		key.WithHelp("r", "reset board"),
 	),
+	Help: key.NewBinding(
+		key.WithKeys("?"),
+		key.WithHelp("?", "toggle help"),
+	),
+}
+
+func (k KeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help, k.Reset, k.Quit}
+}
+
+func (k KeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Up, k.Down, k.Left, k.Right}, // first column
+		{k.Click, k.Flag}, // second column
+		{k.Help, k.Reset, k.Quit}, // third column               
+	}
 }

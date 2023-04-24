@@ -29,5 +29,5 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return lipgloss.NewStyle().Render("Time elapsed: " + m.stopwatch.View())
+	return lipgloss.NewStyle().Render("time elapsed: " + m.stopwatch.View())
 }
