@@ -175,8 +175,8 @@ func (m Model) View() string {
 	}
 	
 	flagsRemainingText := "🚩 remaining: " + strconv.Itoa(m.flagsRemaining)
-	headerView := headerStyle.Render(flagsRemainingText+"      ", m.stopwatch.View())
-	mainView := lipgloss.JoinVertical(lipgloss.Center, headerView, boardStyle.Render(board))
+	footerView := footerStyle.Render(flagsRemainingText+"      ", m.stopwatch.View())
+	mainView := lipgloss.JoinVertical(lipgloss.Center, board, footerView)
 
 	return mainView
 }

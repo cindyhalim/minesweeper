@@ -26,5 +26,5 @@ func formatGameStatus(status GameStatus) string {
 		return loseStyle().Render("you lose!")
 	}
 
-	return ""
+	return statusStyle.Render(" ")
 }

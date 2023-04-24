@@ -27,7 +27,7 @@ var textToANSIMap = map[string]string {
 }
 
 var (
-	headerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Bold(true).Align(lipgloss.Center)
+	footerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Bold(true).Align(lipgloss.Center)
 	baseCellStyle = lipgloss.NewStyle().Width(3).Bold(true).Border(lipgloss.HiddenBorder()).Align(lipgloss.Center).ColorWhitespace(true)
 	hiddenCellStyle = func(isInFocus bool) lipgloss.Style {
 		if isInFocus {
@@ -55,7 +55,6 @@ var (
 	incorrectFlagCellStyle = func() lipgloss.Style {
 		return baseCellStyle.Background(INCORRECT_FLAG_COLOR).BorderBackground(INCORRECT_FLAG_COLOR)
 	}
-	boardStyle = lipgloss.NewStyle().Margin(1)
 )
 
 func getValue (value minesweeper.CellValue, state minesweeper.CellState) string {
