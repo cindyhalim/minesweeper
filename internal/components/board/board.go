@@ -131,12 +131,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				return m, m.gameLose()
 			}
 	
-			if m.flagsRemaining == 0 {
-				if m.checkBoard() {
-					return m, m.gameWin()
-				}
+			if m.flagsRemaining == 0 && m.hasCompletedBoard() {
+				return m, m.gameWin()
 			}
-			
+
 		case key.Matches(msg, m.KeyMap.Flag):
 			minesweeper.ToggleFlag(&m.board, m.cursor.row, m.cursor.col)
 			m.countFlagsRemaining()
@@ -148,14 +146,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m Model) checkBoard() bool {
+func (m Model) hasCompletedBoard() bool {
 	for i := range m.board {
 		for j := range m.board[i] {
 			cell := m.board[i][j]
 
-			if cell.Value == minesweeper.EMPTY_CELL && cell.State != minesweeper.SHOWN {
+			if cell.Value != minesweeper.MINE_CELL && cell.State != minesweeper.SHOWN {
 				return false
-			}
+			} 
 
 			if cell.Value == minesweeper.MINE_CELL && cell.State != minesweeper.FLAGGED {
 				return false
