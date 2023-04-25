@@ -21,7 +21,7 @@ https://user-images.githubusercontent.com/52426595/234143315-84b4e0b4-0635-40c2-
 go run main.go <mode>
 ```
 
-3. or creating and running the executable:
+3. or by creating and running the executable:
 
 ```
 go build
@@ -30,7 +30,6 @@ minesweeper.exe <mode> for windows
 ```
 
 ### modes:
-
 - `beginner`: 9 x 9 board, 10 mines
 - `intermediate`: 16 x 16 board, 40 mines
 - `expert`: 16 x 30 board, 99 mines
