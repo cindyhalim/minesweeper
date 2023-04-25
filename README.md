@@ -4,6 +4,8 @@
 
 simple minesweeper TUI written in Go
 
+powered by [bubbletea](https://github.com/charmbracelet/bubbletea) 🧋
+
 
 https://user-images.githubusercontent.com/52426595/234143315-84b4e0b4-0635-40c2-8c53-98da5bb548f3.mov
 
