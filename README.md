@@ -34,3 +34,7 @@ minesweeper.exe <mode> for windows
 - `beginner`: 9 x 9 board, 10 mines
 - `intermediate`: 16 x 16 board, 40 mines
 - `expert`: 16 x 30 board, 99 mines
+
+### improvements:
+- select mode UI
+- keep track of high score for each mode
